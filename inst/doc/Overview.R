@@ -27,7 +27,7 @@ legend('topleft', c('Data Region', 'Plot Region', 'Figure Region', 'Device Regio
        xjust = 0.5, yjust = 0.5)
 
 
-## ---- echo = TRUE, fig.height = 3, fig.width = 3------------------------------
+## ----echo = TRUE, fig.height = 3, fig.width = 3-------------------------------
 plot(1:10)
 
 getLinesPerInch()
@@ -44,7 +44,7 @@ getPixelsPerDatum()
 getDataPerPixel()
 
 
-## ---- echo = TRUE, fig.height = 5, fig.width = 5------------------------------
+## ----echo = TRUE, fig.height = 5, fig.width = 5-------------------------------
 plot(seq(as.Date('2018-01-01'), as.Date('2019-01-01'), length.out = 10), 1:10,
      pch = 19, xlab = '', ylab = '')
 
@@ -62,7 +62,7 @@ abline(v = convertUnits('proportion', 0.75, 'data', axis = 'x', region = 'device
 
 
 
-## ---- echo = TRUE, fig.height = 5, fig.width = 5------------------------------
+## ----echo = TRUE, fig.height = 5, fig.width = 5-------------------------------
 par(xpd = NA, oma = c(0, 0, 0, 5))
 plot(1:10, pch = 19)
 
@@ -73,7 +73,7 @@ legend(x = 11,
        )
 
 
-## ---- echo = TRUE, fig.height = 5, fig.width = 5------------------------------
+## ----echo = TRUE, fig.height = 5, fig.width = 5-------------------------------
 projects <- list(A = as.Date(c('2018-01-01', '2018-06-04')),
                  B = as.Date(c('2018-02-01', '2018-11-01')),
                  C = as.Date(c('2018-11-01', '2018-12-01')),
@@ -84,7 +84,7 @@ projects <- list(A = as.Date(c('2018-01-01', '2018-06-04')),
                  )
 
 x <- seq(as.Date('2018-01-01'), as.Date('2019-01-01'), length.out = length(projects))
-y <- 1:length(projects)
+y <- seq_along(projects)
 
 plot(x, y, xlim = range(x), ylim = c(0.5, length(projects) + 0.5),
      type = 'n', xlab = 'Date', ylab = '', axes = FALSE, xaxs = 'i', yaxs = 'i')
@@ -99,7 +99,7 @@ for (ii in seq_along(projects))
     lines(projects[[ii]], rep(ii, 2), lwd = lineWidth, ljoin = 2, lend = 1)
 
 
-## ---- echo = TRUE, fig.height = 7, fig.width = 7------------------------------
+## ----echo = TRUE, fig.height = 7, fig.width = 7-------------------------------
 plot(1:10, pch = 19)
 
 originalPar <- par()
@@ -121,7 +121,7 @@ plot(1:10, pch = 19, col = 'red', xlab = '', ylab = '')
 highlightFigureRegion()
 
 
-## ---- echo = FALSE, fig.height = 7, fig.width = 7-----------------------------
+## ----echo = FALSE, fig.height = 7, fig.width = 7------------------------------
 par(xpd = NA)
 
 oldPar <- par(mfrow = c(2, 2), oma = c(1.1,2.1,3.5,4.5))
@@ -192,7 +192,7 @@ cat('Boundaries of figure region:', getBoundaries('figure'), '\n')
 cat('Boundaries of device region:', getBoundaries('device'), '\n')
 
 
-## ---- echo = TRUE, fig.height = 7, fig.width = 7------------------------------
+## ----echo = TRUE, fig.height = 7, fig.width = 7-------------------------------
 par(xpd = NA, mfrow = c(2, 2))
 
 plot(1:10, pch = 19)
@@ -209,5 +209,82 @@ abline(h = lineLocations(side = 1, 0:x[1]), col = 'red', lty = 2)
 abline(v = lineLocations(side = 2, 0:x[2]), col = 'blue', lty = 2)
 abline(h = lineLocations(side = 3, 0:x[3]), col = 'green', lty = 2)
 abline(v = lineLocations(side = 4, 0:x[4]), col = 'black', lty = 2)
+
+
+## ----echo = TRUE, fig.height = 6.5, fig.width = 6.5---------------------------
+
+allAt <- list(seq(as.Date('2020-01-01'), as.Date('2021-01-01'), length.out = 10),
+          c(1:5, 1:5 + 0.1),
+          seq(as.Date('2020-02-01'), as.Date('2020-05-01'), length.out = 10),
+          seq(1, 5, length.out = 5)
+          )
+
+allLas <- list(0, 0, 2, 1)
+
+allLabels <- list(as.character(allAt[[1]]),
+                  rep('Foo', length(allAt[[2]])),
+                  as.character(allAt[[1]]),
+                  rep('Foo', length(allAt[[4]]))
+                  )
+allLabels[[4]][2] <- 'Very\nlong\nlabel\nwith\nnewlines\nincluded'
+
+allSpacing <- list('-', '', '\n', '\n')
+
+par(oma = c(1, 3, 4, 5))
+plot(allAt[[1]],
+     rep(NA, 10), ylim=c(0,10),
+     axes = FALSE, xlab = '', ylab = '')
+box()
+
+tmp <- lapply(1:4, function(ii){
+    repelAxisLabels(side = ii, at = allAt[[ii]], labels = allLabels[[ii]],
+                    las = allLas[[ii]], spacing = allSpacing[[ii]])
+})
+newAt <- lapply(tmp, `[[`, 'at')
+newCex <- lapply(tmp, `[[`, 'cex.axis')
+
+par(xpd = NA)
+
+lineWidths <- list(getDataPerLine()[2],
+                   getDataPerLine()[1],
+                   getDataPerLine()[2],
+                   getDataPerLine()[1]
+                   )
+
+for (ii in seq_along(newAt) ){
+
+    for (jj in seq_along(newAt[[ii]]) ){
+        
+        axis(ii, labels = '', at = allAt[[ii]][jj],
+             cex.axis = newCex[[ii]], line = 0, tick = FALSE)
+
+        axis(ii, labels = allLabels[[ii]][jj], at = newAt[[ii]][jj],
+             cex.axis = newCex[[ii]],  las = allLas[[ii]], col = 'red',
+             col.ticks = 'red', col.axis = 'red', line = 1)
+
+        if (ii %in% 1 ){
+            
+            lines(c(newAt[[ii]][jj], allAt[[ii]][jj]),
+		  c(par('usr')[3] - lineWidths[[ii]], par('usr')[3])
+                  )
+        } else if (ii %in% 2 ){
+            
+            lines(c(par('usr')[1] - lineWidths[[ii]], par('usr')[1]),
+                  c(newAt[[ii]][jj], allAt[[ii]][jj])
+                  )
+        } else if (ii %in% 3 ){
+            
+            lines(c(newAt[[ii]][jj], allAt[[ii]][jj]),
+                  c(par('usr')[4] + lineWidths[[ii]], par('usr')[4])
+                  )
+        } else if (ii %in% 4 ){
+            
+            lines(c(par('usr')[2] + lineWidths[[ii]], par('usr')[2]),
+                  c(newAt[[ii]][jj], allAt[[ii]][jj])
+                  )
+        }
+    }
+}
+
 
 
